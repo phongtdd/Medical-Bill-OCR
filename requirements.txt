@@ -1,0 +1,5 @@
+pandas
+scikit-learn
+transformers
+sentencepiece
+torch ==2.7.0+cu128
