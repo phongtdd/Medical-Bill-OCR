@@ -1,14 +1,19 @@
+import os
 import re
 import warnings
 
 import torch
+from dotenv import load_dotenv
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-model_path = "checkpoint-205"
-tokenizer = AutoTokenizer.from_pretrained(model_path)
-model = AutoModelForSequenceClassification.from_pretrained(model_path).to(device)
+load_dotenv(".env")
+
+tokenizer = AutoTokenizer.from_pretrained(os.getenv("MODEL_PATH"))
+model = AutoModelForSequenceClassification.from_pretrained(os.getenv("MODEL_PATH")).to(
+    device
+)
 
 
 def predict(text) -> int:
