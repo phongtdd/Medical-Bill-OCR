@@ -10,10 +10,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 load_dotenv(".env")
 
-tokenizer = AutoTokenizer.from_pretrained(os.getenv("MODEL_PATH"))
-model = AutoModelForSequenceClassification.from_pretrained(os.getenv("MODEL_PATH")).to(
-    device
-)
+tokenizer = AutoTokenizer.from_pretrained(os.getenv("MODEL_LABEL_PATH"))
+model = AutoModelForSequenceClassification.from_pretrained(
+    os.getenv("MODEL_LABEL_PATH")
+).to(device)
 
 
 def predict(text) -> int:

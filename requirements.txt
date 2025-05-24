@@ -1,6 +1,9 @@
-pandas
-scikit-learn
-transformers
-sentencepiece
-torch ==2.7.0+cu128
-pymongo
+torch ==2.7.0
+    --extra-index-url https://download.pytorch.org/whl/cu128
+matplotlib
+python-dotenv
+pandas==2.2.3
+scikit-learn ==1.6.1
+transformers==4.52.2
+sentencepiece ==0.2.0
+pymongo==4.13.0
