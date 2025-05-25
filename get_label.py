@@ -10,9 +10,9 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 load_dotenv(".env")
 
-tokenizer = AutoTokenizer.from_pretrained(os.getenv("MODEL_LABEL_PATH"))
+tokenizer = AutoTokenizer.from_pretrained(os.getenv("MODEL_LABEL_PATH_1"))
 model = AutoModelForSequenceClassification.from_pretrained(
-    os.getenv("MODEL_LABEL_PATH")
+    os.getenv("MODEL_LABEL_PATH_1")
 ).to(device)
 
 
@@ -63,11 +63,15 @@ def specific_rule(text: str) -> str:
 
 
 def predict_label(text: str) -> str:
-    i: int = predict(text)
-    if i == 1:
-        return "diagnose"
+    label = specific_rule(text)
+    if label != "other":
+        return label
     else:
-        return specific_rule(text)
+        i: int = predict(text)
+        if i == 1:
+            return "diagnose"
+        else:
+            return "other"
 
 
 if __name__ == "__main__":
