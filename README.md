@@ -6,6 +6,12 @@ Install the required packages by using the following command:
 ```bash
 pip install -r requirements.txt
 ```
+# Text Detection
+This module provides a simple interface to run object detection inference on an image
+Here is an example of using it:
+```bash
+python .\detection\infer-detection.py --img data/images/val/VAIPE_P_TRAIN_1103.png
+```
 
 # Download models
 The trained models are available on the Hugging Face model hub: [Hugging Face model hub](https://huggingface.co/Sag1012/Medical_Bill_OCR)
