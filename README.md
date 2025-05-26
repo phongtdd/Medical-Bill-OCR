@@ -1,6 +1,17 @@
 # Medical-Bill-OCR
 Mini-project for course of Intro to Computer Vision
 
+# Installation
+
+Clone the repository and navigate into the project directory:
+
+```bash
+git clone https://github.com/phongtdd/Medical-Bill-OCR.git
+```
+# Move to directory
+```bash
+cd Medical-Bill_OCR
+```
 # Set up
 Install the required packages by using the following command:
 ```bash
