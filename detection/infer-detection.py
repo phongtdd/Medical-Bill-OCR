@@ -24,7 +24,7 @@ def run(img_path):
     output_folder = "crops"
     os.makedirs(output_folder, exist_ok=True)
 
-    model = YOLO("kqua/runs/detect/train/weights/detectext/best.pt")
+    model = YOLO("detection/best.pt")
     results = model(img, device='cuda', iou=0.4)
     result = results[0]
 
