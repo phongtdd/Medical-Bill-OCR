@@ -1,7 +1,7 @@
 MODEL_PATH = {
-    'detection': 'model/best_detection_yolov8.pt',
-    'segmentation': 'model/best_segmentation_unet_resnet50_vaipep.pth',
-    'recognition_crnn': 'model/best_crnn.pth'
+    'detection': r'model/best_detection_yolov8.pt',
+    'segmentation': r'model/best_segmentation_unet_resnet50_vaipep_last_model.pth',
+    'recognition_crnn': r'model/best_crnn.pth'
 }
 
 OUTPUT_PATH = {

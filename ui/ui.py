@@ -26,9 +26,9 @@ def load_detection_model(model_path):
     detection_model = YOLO(model_path)
     return detection_model
 
-def crop_receipt_image(img, model, device, output_dir):
+def crop_receipt_image(img, model, device, save_mode=False, output_dir=None):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    extracted_doc, _ = infer_image(img=img, model=model, device=device, save_mode=True, output_dir=output_dir)
+    extracted_doc, _ = infer_image(img=img, model=model, device=device, save_mode=save_mode, output_dir=output_dir)
     return extracted_doc
 
 def separate_text_to_image(model_pth, img, output_dir):
@@ -133,7 +133,7 @@ if __name__ == "__main__":
         # Crop button
         if st.button("Crop Receipt"):
             clear_output_dir(OUTPUT_PATH['segmentation'])
-            cropped_image = crop_receipt_image(img_array, segmentation_model, device, OUTPUT_PATH['segmentation'])
+            cropped_image = crop_receipt_image(img_array, segmentation_model, device, save_mode=True, output_dir=OUTPUT_PATH['segmentation'])
             st.image(cropped_image, caption="Cropped Receipt")
             st.session_state['cropped_image'] = cropped_image
 

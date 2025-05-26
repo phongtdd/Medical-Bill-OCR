@@ -6,7 +6,7 @@ from inference.doc_segment.save_output import save_outputs
 
 IMG_SIZE = (512, 512)
 
-def infer_image(img, model, device, save_mode=False, output_dir="output"):
+def infer_image(img, model, device, save_mode=True, output_dir="output"):
     img_resized = cv2.resize(img, IMG_SIZE)
     
     extracted_doc, pred_mask = extract_document(img, model, device, image_size=IMG_SIZE)
