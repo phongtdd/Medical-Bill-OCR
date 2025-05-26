@@ -4,6 +4,7 @@ import pandas as pd
 from dotenv import load_dotenv
 
 from predict_text_label.get_label import predict_label
+from predict_text_label.reformat_label import reformat_dict
 
 
 def dict_from_json(file_name: str) -> dict[str, Any]:
@@ -27,7 +28,7 @@ def dict_from_txt(file_name: str) -> dict[str, Any]:
         if label not in d:
             d[label] = []
         d[label].append(line.strip())
-    return d
+    return reformat_dict(d)
 
 
 if __name__ == "__main__":
