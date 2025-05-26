@@ -7,7 +7,7 @@ Install the required packages by using the following command:
 pip install -r requirements.txt
 ```
 # Text Detection
-This module provides a simple interface to run object detection inference on an image
+This module provides a simple interface to run object detection inference on an image .
 Here is an example of using it:
 ```bash
 python .\detection\infer-detection.py --img data/images/val/VAIPE_P_TRAIN_1103.png
