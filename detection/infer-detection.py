@@ -22,7 +22,7 @@ def run(img_path):
         return
 
     output_folder = "crops"
-    os.makedirs(output_folder, exist_ok=True)
+    os.makedirs(f"data/{output_folder}", exist_ok=True)
 
     model = YOLO("detection/best.pt")
     results = model(img, device='cuda', iou=0.4)

@@ -1,13 +1,3 @@
-%pip install --quiet \
-    pillow==9.5.0 \
-    scikit-learn==1.5.2 \
-    gymnasium==0.29.0 \
-    rich==13.7.1 \
-    matplotlib==3.8.0 \
-    vietocr \
-    torch \
-    torchvision
-
 import numpy as np
 np.bool = bool
 np.int = int
@@ -24,13 +14,16 @@ from vietocr.tool.predictor import Predictor
 from tqdm import tqdm
 import torch
 from torchvision import transforms
+from dotenv import load_dotenv
+
+load_dotenv(".env")
 
 Image.ANTIALIAS = Image.LANCZOS
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 config = Cfg.load_config_from_name('vgg_transformer')
-config['weights'] = '/kaggle/input/vietocr/pytorch/default/1/vietocr/final_model.pth' # change
+config['weights'] = os.getenv("MODEL_REGCONITION_PATH") 
 config['device'] = device
 
 predictor = Predictor(config)
@@ -38,7 +31,7 @@ predictor = Predictor(config)
 def predict_vietocr(image):
     return predictor.predict(image)
 
-def run_inference_on_folder(image_dir, output_file='/kaggle/working/text_recognition_output.txt'):
+def run_inference_on_folder(image_dir, output_file='data/text_recognition_output.txt'):
 
     predictions = []
     image_files = [f for f in os.listdir(image_dir) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
@@ -62,4 +55,4 @@ def run_inference_on_folder(image_dir, output_file='/kaggle/working/text_recogni
 
     print(f"Predictions written to {output_file}")
 
-run_inference_on_folder('/kaggle/input/vaipe-crops/vaipe_crops/val')
+run_inference_on_folder('data/crops')
