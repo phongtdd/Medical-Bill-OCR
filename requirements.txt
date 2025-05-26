@@ -11,5 +11,4 @@ opencv-python == 4.10.0.84
 streamlit
 
 pillow==9.5.0 
-vietocr 
-torchvision
+vietocr
