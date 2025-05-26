@@ -3,7 +3,7 @@ from typing import Any
 import pandas as pd
 from dotenv import load_dotenv
 
-from get_label import predict_label
+from predict_text_label.get_label import predict_label
 
 
 def dict_from_json(file_name: str) -> dict[str, Any]:
@@ -31,7 +31,9 @@ def dict_from_txt(file_name: str) -> dict[str, Any]:
 
 
 if __name__ == "__main__":
-    # file = "/home/sag/Working/Hust/Medical-Bill-OCR/data/VAIPE_P_TRAIN_0.json"
-    # data_dict = dict_from_json(file)
-    # print(data_dict)
-    file = 
+    load_dotenv()
+    print(
+        dict_from_json(
+            "/home/sag/Working/Hust/Medical-Bill-OCR/data/vaipe-p/public_train/label/VAIPE_P_TRAIN_0.json"
+        )
+    )

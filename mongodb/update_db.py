@@ -4,11 +4,13 @@ from typing import Any
 from bson.binary import Binary
 
 from mongodb.connection import database
-from util import *
+from mongodb.util import *
 
 
-def add_bill(file_name: str, db_name: str = "CV_train_label") -> str:
-    file_path = f"data/vaipe-p/public_train/label/{file_name}"
+def add_bill_json(
+    data_folder: str, file_name: str, db_name: str = "CV_train_label"
+) -> str:
+    file_path = f"{data_folder}/{file_name}"
     d: dict[str, list[str]] = dict_from_json(file_path)
     d = {"name": file_name, **d}
     collection = database[db_name]
@@ -20,8 +22,10 @@ def add_bill(file_name: str, db_name: str = "CV_train_label") -> str:
     return result.inserted_id
 
 
-def add_bill(file_name: str, db_name: str = "CV_train_label") -> str:
-    file_path = f"data/vaipe-p/public_test/label/{file_name}"
+def add_bill_txt(
+    data_folder: str, file_name: str, db_name: str = "CV_test_label"
+) -> str:
+    file_path = f"{data_folder}/{file_name}"
     d: dict[str, list[str]] = dict_from_txt(file_path)
     d = {"name": file_name, **d}
     collection = database[db_name]
@@ -41,8 +45,8 @@ def get_bill(file_name: str, db_name: str = "CV_train_label") -> dict[str, Any]:
     return doc
 
 
-def add_image(file_name: str, db_name: str = "CV_train_image") -> str:
-    with open(f"data/vaipe-p/public_train/image/{file_name}", "rb") as f:
+def add_image(data_folder: str, file_name: str, db_name: str = "CV_train_image") -> str:
+    with open(f"{data_folder}/{file_name}", "rb") as f:
         image_data = f.read()
     doc = {
         "name": file_name,
@@ -66,11 +70,12 @@ def get_image(file_name: str, name: str = "CV_image") -> None:
 
 
 if __name__ == "__main__":
-    for file_name in os.listdir("data/vaipe-p/public_train/image"):
-        if not file_name.endswith(".png"):
+    data_folder = "data/vaipe-p/public_train/label"
+    for file_name in os.listdir(data_folder):
+        if not file_name.endswith(".json"):
             continue
         try:
-            id = add_image(file_name)
+            id = add_bill_json(data_folder, file_name)
             print(f"Added bill with ID: {id}")
         except Exception as e:
             print(f"Error adding bill {file_name}: {e}")
