@@ -10,7 +10,7 @@ git clone https://github.com/phongtdd/Medical-Bill-OCR.git
 ```
 # Move to directory
 ```bash
-cd Medical-Bill_OCR
+cd Medical-Bill-OCR
 ```
 # Set up
 Install the required packages by using the following command:
