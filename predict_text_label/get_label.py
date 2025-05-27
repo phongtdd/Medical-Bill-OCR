@@ -13,7 +13,7 @@ load_dotenv(".env")
 tokenizer = AutoTokenizer.from_pretrained(os.getenv("MODEL_LABEL_PATH_1"))
 model = AutoModelForSequenceClassification.from_pretrained(
     os.getenv("MODEL_LABEL_PATH_1")
-).to(device)
+).to(device)    
 
 
 def predict(text) -> int:
