@@ -1,28 +1,28 @@
 import streamlit as st
 import json
 import os
+import numpy as np
 from datetime import datetime
 from PIL import Image
 import io
 import cv2
-from inference.doc_segment.infer import infer_image
-from inference.doc_segment.model import load_model
-from inference.detection.infer import seperate_text
-from inference.recognition.infer_crnn import *
-from inference.recognition.infer_vietocr import *
-import numpy as np
-from config import *
 from ultralytics import YOLO
 import importlib, PIL, PIL._util
 importlib.reload(PIL)
 importlib.reload(PIL._util)
-
 from vietocr.tool.config import Cfg
 from vietocr.tool.predictor import Predictor
 import torch
 from torchvision import transforms
 from dotenv import load_dotenv
 
+from backend.inference.doc_segment.infer import infer_image
+from backend.inference.doc_segment.model import load_model
+from backend.inference.detection.infer import seperate_text
+from backend.inference.recognition.infer_crnn import *
+from backend.inference.recognition.infer_vietocr import *
+from backend.config import *
+from predict_text_label.get_label import *
 
 def load_vietocr_model(model_path):
     load_dotenv(".env")
@@ -55,16 +55,12 @@ def separate_text_to_image(model_pth, img, output_dir):
     detection_model = load_detection_model(model_pth)
     seperate_text(detection_model, img, output_dir)
        
-def extract_information(image):
-    return {
-        "store_name": "Sample Store",
-        "date": "2025-05-26",
-        "total": 29.99,
-        "items": [
-            {"name": "Item 1", "price": 9.99},
-            {"name": "Item 2", "price": 20.00}
-        ]
-    }
+def extract_information(text):
+    labels = {}
+    for line in text.split('\n'):
+        label_of_text = predict_label(line)
+        labels[label_of_text] = line
+    return labels
 
 def save_information(extracted_data):
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -125,10 +121,11 @@ def recognize_all_detected_images(model_number, model, device, input_dir, output
 
         all_text = '\n'.join(recognized_results)
     output_filepath = os.path.join(output_dir, "recognized_text.txt")
+    output_filepath = output_filepath.replace('\\', '/')
     with open(output_filepath, 'w', encoding='utf-8') as f:
         f.write(all_text)
 
-    return output_filepath
+    return all_text
 
 
 
@@ -168,12 +165,16 @@ if __name__ == "__main__":
 
         # Extract information button
         if 'cropped_image' in st.session_state and st.button("Extract Information"):
+            # Detect
             clear_output_dir(OUTPUT_PATH['detection'])
             separate_text_to_image(MODEL_PATH['detection'], st.session_state['cropped_image'], OUTPUT_PATH['detection'])
+
+            # Recognize
             clear_output_dir(OUTPUT_PATH['recognition'])
-            recognize_all_detected_images( 1,regconition_model, device, OUTPUT_PATH['detection'], OUTPUT_PATH['recognition'])
+            recognized_text = recognize_all_detected_images(1,regconition_model, device, OUTPUT_PATH['detection'], OUTPUT_PATH['recognition'])
             
-            extracted_data = extract_information(st.session_state['cropped_image'])
+            # Extract information
+            extracted_data = extract_information(recognized_text)
             st.session_state['extracted_data'] = extracted_data
 
             # Display extracted information

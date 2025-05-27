@@ -1,6 +1,6 @@
 import torch
-from inference.recognition.crnn import *
-from inference.recognition.utlis import *
+from backend.inference.recognition.crnn import *
+from backend.inference.recognition.utlis import *
 
 device = torch.device('cuda')
 model = CRNN(imgH=32, nc=1, nclass=len(full_alphabet) + 1, nh=256).to(device)

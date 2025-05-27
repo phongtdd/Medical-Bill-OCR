@@ -1,8 +1,8 @@
 import cv2
 import torch
 import os
-from inference.doc_segment.process import extract_document
-from inference.doc_segment.save_output import save_outputs
+from backend.inference.doc_segment.process import extract_document
+from backend.inference.doc_segment.save_output import save_outputs
 
 IMG_SIZE = (512, 512)
 
