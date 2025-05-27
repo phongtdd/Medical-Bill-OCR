@@ -9,9 +9,29 @@ from inference.doc_segment.infer import infer_image
 from inference.doc_segment.model import load_model
 from inference.detection.infer import seperate_text
 from inference.recognition.infer_crnn import *
+from inference.recognition.infer_vietocr import *
 import numpy as np
 from config import *
 from ultralytics import YOLO
+import importlib, PIL, PIL._util
+importlib.reload(PIL)
+importlib.reload(PIL._util)
+
+from vietocr.tool.config import Cfg
+from vietocr.tool.predictor import Predictor
+import torch
+from torchvision import transforms
+from dotenv import load_dotenv
+
+
+def load_vietocr_model(model_path):
+    load_dotenv(".env")
+    Image.ANTIALIAS = Image.LANCZOS
+    config = Cfg.load_config_from_name('vgg_transformer')
+    config['weights'] = model_path
+    config['device'] = 'cuda'
+    predictor = Predictor(config)
+    return predictor
 
 def load_crnn_model(model_path):
     crnn_model = CRNN(imgH=32, nc=1, nclass=len(full_alphabet) + 1, nh=256).to(device)
@@ -36,7 +56,6 @@ def separate_text_to_image(model_pth, img, output_dir):
     seperate_text(detection_model, img, output_dir)
        
 def extract_information(image):
-    
     return {
         "store_name": "Sample Store",
         "date": "2025-05-26",
@@ -85,22 +104,26 @@ def clear_output_dir(output_dir):
             except Exception as e:
                 print(f"Failed to delete {file_path}. Reason: {e}")
 
-def recognize_all_detected_images(model, device, input_dir, output_dir):
+def recognize_all_detected_images(model_number, model, device, input_dir, output_dir):
     recognized_results = []
+    if model_number == 0:
+        for filename in os.listdir(input_dir):
+            if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+                image_path = os.path.join(input_dir, filename)
+                recognized_text = crnn_recognize_text(model, image_path, device)
 
-    for filename in os.listdir(input_dir):
-        if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
-            image_path = os.path.join(input_dir, filename)
-            recognized_text = recognition_text(model, image_path, device)
+                recognized_results.append(recognized_text)
 
-            # if isinstance(recognized_text, bytes):
-            #     recognized_text = recognized_text.decode('utf-8', errors='ignore')
+        all_text = '\n'.join(recognized_results)
 
-            recognized_results.append(recognized_text)
+    if model_number == 1:
+        for filename in os.listdir(input_dir):
+            if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+                image_path = os.path.join(input_dir, filename)
+                recognized_text = vietocr_recognize_text(model, image_path)
+                recognized_results.append(recognized_text)
 
-    all_text = '\n'.join(recognized_results)
-    print(all_text)
-
+        all_text = '\n'.join(recognized_results)
     output_filepath = os.path.join(output_dir, "recognized_text.txt")
     with open(output_filepath, 'w', encoding='utf-8') as f:
         f.write(all_text)
@@ -115,7 +138,13 @@ if __name__ == "__main__":
     segmentation_model, device = load_segmentation_model(MODEL_PATH['segmentation'])
     detection_model = load_detection_model(MODEL_PATH['detection'])
     crnn_model = load_crnn_model(MODEL_PATH['recognition_crnn'])
-    
+    vietocr_model = load_vietocr_model(MODEL_PATH['recognition_vietocr'])
+    model_recognize_number = 1
+    if model_recognize_number == 0:
+        regconition_model = crnn_model
+    if model_recognize_number == 1:
+        regconition_model = vietocr_model
+
     st.title("Receipt Information Extraction")
 
     uploaded_file = st.file_uploader("Upload Receipt Image", type=["png", "jpg", "jpeg"])
@@ -142,7 +171,7 @@ if __name__ == "__main__":
             clear_output_dir(OUTPUT_PATH['detection'])
             separate_text_to_image(MODEL_PATH['detection'], st.session_state['cropped_image'], OUTPUT_PATH['detection'])
             clear_output_dir(OUTPUT_PATH['recognition'])
-            recognition_text_path = recognize_all_detected_images(crnn_model, device, OUTPUT_PATH['detection'], OUTPUT_PATH['recognition'])
+            recognize_all_detected_images( 1,regconition_model, device, OUTPUT_PATH['detection'], OUTPUT_PATH['recognition'])
             
             extracted_data = extract_information(st.session_state['cropped_image'])
             st.session_state['extracted_data'] = extracted_data
