@@ -3,20 +3,10 @@ import re
 import warnings
 
 import torch
-from dotenv import load_dotenv
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-load_dotenv(".env")
-
-tokenizer = AutoTokenizer.from_pretrained(os.getenv("MODEL_LABEL_PATH_1"))
-model = AutoModelForSequenceClassification.from_pretrained(
-    os.getenv("MODEL_LABEL_PATH_1")
-).to(device)    
-
-
-def predict(text) -> int:
+def predict(text, model, tokenizer, device) -> int:
     inputs = tokenizer(text, return_tensors="pt")
     inputs = {k: v.to(device) for k, v in inputs.items()}
 
@@ -62,12 +52,12 @@ def specific_rule(text: str) -> str:
     return "other"
 
 
-def predict_label(text: str) -> str:
+def predict_label(text: str, model, tokenizer, device) -> str:
     label = specific_rule(text)
     if label != "other":
         return label
     else:
-        i: int = predict(text)
+        i: int = predict(text, model, tokenizer, device)
         if i == 1:
             return "diagnose"
         else:

@@ -1,33 +1,7 @@
-import torch
 import cv2
 import numpy as np
-import segmentation_models_pytorch as smp
+import torch
 import torchvision.transforms as transforms
-import matplotlib.pyplot as plt
-from torchinfo import summary
-import logging
-
-IMG_SIZE = (512, 512)
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-# Initialize and load model
-model = smp.Unet(
-    encoder_name="resnet50",
-    encoder_weights="imagenet",
-    in_channels=3,
-    classes=1,
-    activation=None
-).to(device)
-
-model_path = r"Final_Code\Model\best_segmentation_unet_resnet50_vaipep (1).pth"
-try:
-    model.load_state_dict(torch.load(model_path, map_location=device))
-    logging.info(f"Loaded model weights from {model_path}")
-except Exception as e:
-    logging.error(f"Failed to load model weights: {e}")
-    raise
-
-summary(model, input_size=(1, 3, 712, 488), col_names=["input_size", "output_size", "num_params"])
 
 def order_points(pts):
     rect = np.zeros((4, 2), dtype=np.float32)
@@ -42,7 +16,7 @@ def find_dest(corners):
     height = max(np.linalg.norm(corners[0] - corners[3]), np.linalg.norm(corners[1] - corners[2]))
     return np.array([[0, 0], [width - 1, 0], [width - 1, height - 1], [0, height - 1]], dtype=np.float32)
 
-def extract_document(image, model, image_size=(488, 488), buffer=10):
+def extract_document(image, model, device, image_size=(512, 512), buffer=10):
     imH, imW, _ = image.shape
     half = image_size[0] // 2
     scale_x, scale_y = imW / image_size[0], imH / image_size[1]
@@ -96,33 +70,3 @@ def extract_document(image, model, image_size=(488, 488), buffer=10):
     M = cv2.getPerspectiveTransform(corners, destination_corners)
     final = cv2.warpPerspective(image_true, M, (int(destination_corners[2][0]), int(destination_corners[2][1])), flags=cv2.INTER_LANCZOS4)
     return np.clip(final, 0, 255).astype(np.uint8), pred_mask
-
-def visualize_segmentation(img, mask, extracted, threshold=0.5):
-    if mask.max() <= 1.0:
-        mask = (mask > threshold).astype(np.uint8)
-    
-    fig = plt.figure(figsize=(15, 7))
-    ax1 = fig.add_subplot(131)
-    ax1.imshow(img)
-    ax1.set_title("Original")
-    ax1.axis("off")
-    
-    ax2 = fig.add_subplot(132)
-    ax2.imshow(mask)
-    ax2.set_title("Mask")
-    ax2.axis("off")
-    
-    ax3 = fig.add_subplot(133)
-    ax3.imshow(extracted)
-    ax3.set_title("Extracted Document")
-    ax3.axis("off")
-    plt.show()
-
-if __name__ == "__main__":
-    img_path = r"test_image\419fb63b-16e9-4685-95e1-7e49588c9a70.jpg"
-    img = cv2.imread(img_path)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    img_resized = cv2.resize(img, IMG_SIZE)
-
-    extracted_doc, pred_mask = extract_document(img, model, image_size=IMG_SIZE)
-    visualize_segmentation(img_resized, pred_mask, extracted_doc)

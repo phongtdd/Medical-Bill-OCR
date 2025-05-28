@@ -3,8 +3,8 @@ from typing import Any
 import pandas as pd
 from dotenv import load_dotenv
 
-from predict_text_label.get_label import predict_label
-from predict_text_label.reformat_label import reformat_dict
+from backend.inference.text_label.get_label import predict_label
+from backend.inference.text_label.reformat_label import reformat_dict
 
 
 def dict_from_json(file_name: str) -> dict[str, Any]:
