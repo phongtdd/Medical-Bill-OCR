@@ -7,6 +7,18 @@ from mongodb.connection import database
 from mongodb.util import *
 
 
+def add_bill_dict(
+    data: dict, db_name: str = "CV_train_label"
+) -> str:
+    d = {"name": "test", **data}
+    collection = database[db_name]
+    existing = collection.find_one(d)
+    if existing:
+        print("Duplicate document found")
+        return existing["_id"]
+    result = collection.insert_one(d)
+    return result.inserted_id
+
 def add_bill_json(
     data_folder: str, file_name: str, db_name: str = "CV_train_label"
 ) -> str:
