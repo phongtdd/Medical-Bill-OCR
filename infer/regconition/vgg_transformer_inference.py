@@ -125,4 +125,4 @@ def run_inference_on_folder(image_dir, output_file="data/text_recognition_output
             f.write(line + "\n")
 
     print(f"Predictions written to {output_file}")
->>>>>>>> f411a63e86ed8b82c9ee9bb4e5ddb76b5fb639b7:infer/regconition/regconition_inference.py
+###

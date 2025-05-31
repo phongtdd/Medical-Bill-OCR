@@ -56,3 +56,4 @@ def run_inference_on_folder(image_dir, output_file='data/text_recognition_output
     print(f"Predictions written to {output_file}")
 
 run_inference_on_folder('data/crops')
+###
