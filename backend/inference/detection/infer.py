@@ -1,7 +1,7 @@
 import cv2
 import os
 
-def enlarge_box(xyxy, scale=1.6, img_shape=None):
+def enlarge_box(xyxy, scale=0.35, img_shape=None):
     x1, y1, x2, y2 = xyxy
     h = y2 - y1
     pad_w = h * scale
@@ -20,7 +20,7 @@ def seperate_text(model, image, output_folder):
 
     for i, box in enumerate(result.boxes):
         x1, y1, x2, y2 = box.xyxy[0].tolist()
-        x1, y1, x2, y2 = enlarge_box([x1, y1, x2, y2], scale=1.6, img_shape=image.shape)
+        x1, y1, x2, y2 = enlarge_box([x1, y1, x2, y2], scale=0.35, img_shape=image.shape)
         crop = image[y1:y2, x1:x2]
         save_path = os.path.join(output_folder, f"crop_{i+1}.jpg")
         cv2.imwrite(save_path, crop)
