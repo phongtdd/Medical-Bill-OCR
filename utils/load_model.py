@@ -9,7 +9,7 @@ import torch
 from dotenv import load_dotenv
 from ultralytics import YOLO
 
-from infer.CRNN.crnn import CRNN
+from backend.inference.recognition.crnn import CRNN
 
 importlib.reload(PIL)
 importlib.reload(PIL._util)
@@ -35,6 +35,15 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 def load_vietocr():
     config = Cfg.load_config_from_name("vgg_transformer")
     config["weights"] = os.getenv("MODEL_REGCONITION_PATH")
+    config["device"] = device
+
+    predictor = Predictor(config)
+    return predictor
+
+
+def load_viet_seq():
+    config = Cfg.load_config_from_name("vgg_seq2seq")
+    config["weights"] = os.getenv("MODEL_VGG_SEQ2_PATH")
     config["device"] = device
 
     predictor = Predictor(config)
@@ -72,8 +81,8 @@ def load_detection_model():
 
 
 def load_label_model():
-    tokenizer = AutoTokenizer.from_pretrained(os.getenv("MODEL_LABEL_PATH"))
+    tokenizer = AutoTokenizer.from_pretrained(os.getenv("MODEL_LABEL_PATH_V2"))
     model = AutoModelForSequenceClassification.from_pretrained(
-        os.getenv("MODEL_LABEL_PATH")
+        os.getenv("MODEL_LABEL_PATH_V2")
     ).to(device)
     return model, tokenizer

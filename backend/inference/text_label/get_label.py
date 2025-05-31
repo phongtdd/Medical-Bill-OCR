@@ -54,15 +54,20 @@ def specific_rule(text: str) -> str:
 
 
 def predict_label(text: str, model, tokenizer) -> str:
+    id2label = {
+        0: "date",
+        1: "diagnose",
+        2: "drugname",
+        3: "other",
+        4: "quantity",
+        5: "usage",
+    }
     label = specific_rule(text)
     if label != "other":
         return label
     else:
         i: int = predict(text, model, tokenizer)
-        if i == 1:
-            return "diagnose"
-        else:
-            return "other"
+        return id2label.get(i, "other")
 
 
 if __name__ == "__main__":

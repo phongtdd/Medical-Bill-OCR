@@ -19,6 +19,7 @@ from backend.inference.detection.infer import seperate_text
 from backend.inference.doc_segment.infer import infer_image
 from backend.inference.recognition.infer_crnn import *
 from backend.inference.recognition.infer_vietocr import *
+from backend.inference.recognition.vgg_seq2seq_inference import vgg_seq_recognize_text
 from backend.inference.text_label.get_label import predict_label
 from backend.inference.text_label.reformat_label import reformat_dict
 from mongodb.update_db import *
@@ -81,26 +82,42 @@ def clear_output_dir(output_dir):
                 print(f"Failed to delete {file_path}. Reason: {e}")
 
 
-def recognize_all_detected_images(model_number, model, device, input_dir, output_dir):
-    recognized_results = []
+def get_recognizer(model_number: int, model, device):
     if model_number == 0:
-        for filename in os.listdir(input_dir):
-            if filename.lower().endswith((".png", ".jpg", ".jpeg")):
-                image_path = os.path.join(input_dir, filename)
-                recognized_text = crnn_recognize_text(model, image_path, device)
-                recognized_results.append(recognized_text)
-        all_text = "\n".join(recognized_results)
+        return lambda image_path: crnn_recognize_text(model, image_path, device)
+    elif model_number == 1:
+        return lambda image_path: vietocr_recognize_text(model, image_path)
+    elif model_number == 2:
+        return lambda image_path: vgg_seq_recognize_text(model, image_path)
+    else:
+        raise ValueError(f"Unsupported model number: {model_number}")
 
-    if model_number == 1:
-        for filename in os.listdir(input_dir):
-            if filename.lower().endswith((".png", ".jpg", ".jpeg")):
-                image_path = os.path.join(input_dir, filename)
-                recognized_text = vietocr_recognize_text(model, image_path)
-                recognized_results.append(recognized_text)
-        all_text = "\n".join(recognized_results)
 
+def recognize_all_detected_images(
+    model_number: int,
+    model,
+    device,
+    input_dir: str,
+    output_dir: str,
+) -> str:
+    recognizer = get_recognizer(model_number, model, device)
+
+    # Collect valid image files
+    image_files = [
+        f
+        for f in os.listdir(input_dir)
+        if f.lower().endswith((".png", ".jpg", ".jpeg"))
+    ]
+
+    # Run recognition
+    recognized_results = [
+        recognizer(os.path.join(input_dir, filename)) for filename in image_files
+    ]
+
+    all_text = "\n".join(recognized_results)
+
+    # Ensure output directory exists and write results
     os.makedirs(output_dir, exist_ok=True)
-
     output_filepath = os.path.join(output_dir, "recognized_text.txt")
     with open(output_filepath, "w", encoding="utf-8") as f:
         f.write(all_text)
@@ -111,41 +128,42 @@ def recognize_all_detected_images(model_number, model, device, input_dir, output
 # Main
 # ----------------------------------------------
 if __name__ == "__main__":
-    segmentation_model = load_segmentation()
-    detection_model = load_detection_model()
-    label_model, tokenizer = load_label_model()
-
     st.title("Receipt Information Extraction")
 
-    # Model selection
     model_name = st.selectbox(
-        "Choose Text Recognition Model", ("CRNN", "VietOCR"), index=1
-    )
-    model_recognize_number = 0 if model_name == "CRNN" else 1
-    regconition_model = (
-        load_crnn_model() if model_recognize_number == 0 else load_vietocr()
+        "Choose Text Recognition Model", ("CRNN", "VietOCR", "VGG_Seq2Seq"), index=1
     )
 
-    # Input choice
     source_choice = st.radio(
         "Choose Image Source:", ["Upload New", "Use from Database"]
     )
-    img_array = None
-    filename = None
 
+    # Initialize session state
+    if "img_array" not in st.session_state:
+        st.session_state["img_array"] = None
+    if "filename" not in st.session_state:
+        st.session_state["filename"] = None
+
+    # Upload or DB image loading
     if source_choice == "Upload New":
         uploaded_file = st.file_uploader(
             "Upload Receipt Image", type=["png", "jpg", "jpeg"]
         )
-        custom_filename = st.text_input("Enter custom file name (without extension):")
         if uploaded_file:
-            filename = (
-                custom_filename.strip() + ".jpg"
-                if custom_filename.strip()
-                else uploaded_file.name
+            filename = uploaded_file.name
+            custome_name = st.text_input(
+                "Enter custom name for the image (optional)", value=filename
             )
+            if custome_name:
+                filename = custome_name
+
             image = Image.open(uploaded_file)
             img_array = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+
+            # Update session state
+            st.session_state["img_array"] = img_array
+            st.session_state["filename"] = filename
+
             st.image(image, caption="Uploaded Receipt")
 
     elif source_choice == "Use from Database":
@@ -157,14 +175,21 @@ if __name__ == "__main__":
         )
         if st.button("Load Image from DB"):
             try:
-                binary_data = get_image(db_filename, db_name)
+                binary_data = get_item(db_filename, db_name)
                 img_array = decode_image(binary_data)
                 filename = db_filename
+
+                # Update session state
+                st.session_state["img_array"] = img_array
+                st.session_state["filename"] = filename
+
                 st.image(img_array, channels="BGR", caption="Loaded from Database")
             except ValueError as e:
                 st.error(str(e))
 
-    # Proceed if image is ready
+    img_array = st.session_state.get("img_array", None)
+    filename = st.session_state.get("filename", None)
+
     if img_array is not None:
         # Crop
         if "cropped_image" in st.session_state:
@@ -172,6 +197,7 @@ if __name__ == "__main__":
 
         # Crop button
         if st.button("Crop Receipt"):
+            segmentation_model = load_segmentation()
             clear_output_dir(os.getenv("folder_segmentation"))
             cropped_image = crop_receipt_image(
                 img_array,
@@ -186,13 +212,23 @@ if __name__ == "__main__":
         # Extract information button
         if "cropped_image" in st.session_state and st.button("Extract Information"):
             # Detect
+            detection_model = load_detection_model()
             clear_output_dir(os.getenv("folder_detection"))
             separate_text_to_image(
                 detection_model,
                 st.session_state["cropped_image"],
                 os.getenv("folder_detection"),
             )
-
+            model_recognize_number = (
+                0 if model_name == "CRNN" else 1 if model_name == "VietOCR" else 2
+            )
+            regconition_model = (
+                load_crnn_model()
+                if model_recognize_number == 0
+                else load_vietocr()
+                if model_recognize_number == 1
+                else load_viet_seq()
+            )
             # Recognize
             clear_output_dir(os.getenv("folder_recognition"))
             recognized_text = recognize_all_detected_images(
@@ -202,7 +238,7 @@ if __name__ == "__main__":
                 os.getenv("folder_detection"),
                 os.getenv("folder_recognition"),
             )
-
+            label_model, tokenizer = load_label_model()
             extracted_data = extract_information(
                 recognized_text, label_model, tokenizer
             )
@@ -239,13 +275,16 @@ if __name__ == "__main__":
 
     if st.button("Get Information"):
         try:
-            bill = get_bill(file_1_name, db)
-            st.subheader("Fetched Information")
-            st.json(bill)
+            item = get_item(file_1_name, db)
+            if isinstance(item, bytes):
+                img_array = decode_image(item)
+                st.image(img_array, channels="BGR", caption="Fetched Image from DB")
 
-            # ➕ Add any additional processing here if needed
-            # For example, if you want to use `bill` for downstream logic:
-            st.success("Fetched information processed successfully.")
-            # st.session_state["fetched_bill"] = bill  # If needed for reuse
+            elif isinstance(item, dict):
+                st.subheader("Fetched Information")
+                st.json(item)
+            else:
+                st.warning("Unsupported data type returned from DB.")
+
         except ValueError as e:
             st.error(str(e))

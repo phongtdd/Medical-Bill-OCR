@@ -13,3 +13,4 @@ albumentations
 pillow==9.5.0 
 vietocr
 numpy
+segmentation_models_pytorch

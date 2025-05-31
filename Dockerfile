@@ -6,6 +6,12 @@
 ARG PYTHON_VERSION=3.10.16
 FROM python:${PYTHON_VERSION}-slim AS base
 
+# System dependencies for OpenCV
+RUN apt-get update && apt-get install -y \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
 # Prevents Python from writing pyc files.
 ENV PYTHONDONTWRITEBYTECODE=1
 
@@ -17,6 +23,10 @@ COPY requirements.txt .
 RUN pip install --default-timeout=1800 -r requirements.txt
 COPY . .
 
+# Expose the Streamlit default port
+EXPOSE 8501
+
 # Set the command to run the application
 CMD ["/bin/bash"]
+
 

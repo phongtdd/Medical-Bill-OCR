@@ -7,9 +7,7 @@ from mongodb.connection import database
 from mongodb.util import *
 
 
-def add_bill_dict(
-    data: dict, db_name: str = "CV_train_label"
-) -> str:
+def add_bill_dict(data: dict, db_name: str = "CV_train_label") -> str:
     d = {"name": "test", **data}
     collection = database[db_name]
     existing = collection.find_one(d)
@@ -18,6 +16,7 @@ def add_bill_dict(
         return existing["_id"]
     result = collection.insert_one(d)
     return result.inserted_id
+
 
 def add_bill_json(
     data_folder: str, file_name: str, db_name: str = "CV_train_label"
@@ -49,14 +48,6 @@ def add_bill_txt(
     return result.inserted_id
 
 
-def get_bill(file_name: str, db_name: str = "CV_train_label") -> dict[str, Any]:
-    collection = database[db_name]
-    doc = collection.find_one({"name": file_name})
-    if not doc:
-        raise ValueError(f"No document found with this name: {file_name}")
-    return doc
-
-
 def add_image(data_folder: str, file_name: str, db_name: str = "CV_train_image") -> str:
     with open(f"{data_folder}/{file_name}", "rb") as f:
         image_data = f.read()
@@ -73,12 +64,19 @@ def add_image(data_folder: str, file_name: str, db_name: str = "CV_train_image")
     return result.inserted_id
 
 
-def get_image(file_name: str, name: str = "CV_image") -> None:
-    collection = database[name]
+def get_item(file_name: str, db_name: str = "CV_train_label") -> dict[str, Any] | bytes:
+    valid_image_extensions = (".png", ".jpg", ".jpeg")
+    collection = database[db_name]
     doc = collection.find_one({"name": file_name})
     if not doc:
         raise ValueError(f"No document found with this name: {file_name}")
-    return doc["image"]
+
+    if file_name.lower().endswith(valid_image_extensions):
+        if "image" not in doc:
+            raise ValueError(f"'image' field not found in document: {file_name}")
+        return doc["image"]
+
+    return doc
 
 
 if __name__ == "__main__":
