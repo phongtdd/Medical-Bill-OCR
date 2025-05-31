@@ -28,7 +28,7 @@ Image.ANTIALIAS = Image.LANCZOS
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-config = Cfg.load_config_from_name("vgg_transformer")
+config = Cfg.load_config_from_name("vgg_seq2seq")
 config["weights"] = os.getenv("MODEL_REGCONITION_PATH")
 config["device"] = device
 
