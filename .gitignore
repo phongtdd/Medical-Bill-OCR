@@ -1,3 +1,5 @@
+.env
+
 # VSCode
 .vscode/*
 !.vscode/settings.json
@@ -18,7 +20,12 @@ __pycache__/
 *.tsv.gz
 *.xlsx
 *.png
+*.jpg
+*.txt
 
 # Model
-*/model/*.pt
-*/model/*.pth
+*.pt
+*.pth
+*.safetensors
+*.model
+*.bin
