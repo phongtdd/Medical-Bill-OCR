@@ -29,11 +29,11 @@ For ease of use, we also provide a installation package via a docker image. You 
 
 - Pull Chronos's docker image:
 ```bash
-docker pull sagp1012/medical-bill-ocr:latest
+docker pull sagp1012/medical-bill-ocr:latest-v1
 ```
 - Run a docker container:
 ```bash
-docker run --gpus all -p 8501:8501 medical-bill-ocr
+docker run --gpus all -p 8501:8501 sagp1012/medical-bill-ocr
 ```
 
 # Download models
