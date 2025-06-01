@@ -8,7 +8,7 @@ This project extracts and processes textual information from medical bills using
 
 # Installation
 
-## Install via `pip`
+## Install via pip
 - Clone project
 ```bash
 git clone https://github.com/phongtdd/Medical-Bill-OCR.git
