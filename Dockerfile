@@ -27,6 +27,4 @@ COPY . .
 EXPOSE 8501
 
 # Set the command to run the application
-CMD ["/bin/bash"]
-
-
+CMD ["streamlit", "run", "ui.py", "--server.address=0.0.0.0"]

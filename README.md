@@ -1,31 +1,40 @@
-# Medical-Bill-OCR
-Mini-project for course of Intro to Computer Vision
+# Medical Bill OCR
+
+A mini-project developed for the *Introduction to Computer Vision* course.
+
+This project extracts and processes textual information from medical bills using Optical Character Recognition (OCR) techniques.
+
+---
 
 # Installation
 
-Clone the repository and navigate into the project directory:
-
+## Install via `pip`
+- Clone project
 ```bash
 git clone https://github.com/phongtdd/Medical-Bill-OCR.git
-```
-# Move to directory
-```bash
 cd Medical-Bill-OCR
 ```
-# Set up
-Install the required packages by using the following command:
+- Install requirement
 ```bash
 pip install -r requirements.txt
 ```
-# Text Detection
-This module provides a simple interface to run object detection inference on an image .
-Here is an example of using it:
+
+- Run application
 ```bash
-python .\detection\infer-detection.py --img data/images/val/VAIPE_P_TRAIN_1103.png
+python -m streamlit run ui.py
+```
+
+## Environment Configuration via Docker
+For ease of use, we also provide a installation package via a docker image. You can set up Chronos's docker step-by-step as follow:
+
+- Pull Chronos's docker image:
+```bash
+docker pull sagp1012/medical-bill-ocr:latest
+```
+- Run a docker container:
+```bash
+docker run --gpus all -p 8501:8501 medical-bill-ocr
 ```
 
 # Download models
 The trained models are available on the Hugging Face model hub: [Hugging Face model hub](https://huggingface.co/Sag1012/Medical_Bill_OCR)
-
-You can see so many models here. However, if you want to try the best model of our experiments, you can try the model in the following folder:
-- Predict label: [diagnose_predict_v2](https://huggingface.co/Sag1012/Medical_Bill_OCR/tree/main/diagnose_predict_v2)
