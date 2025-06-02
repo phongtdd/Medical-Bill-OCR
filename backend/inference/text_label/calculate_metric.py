@@ -8,8 +8,7 @@ from sklearn.metrics import (
     precision_score,
     recall_score,
 )
-
-from get_label import predict_label
+from text_label.get_label import predict_label
 
 
 def get_p_r_f(data):

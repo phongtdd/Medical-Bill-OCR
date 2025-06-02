@@ -45,16 +45,14 @@ def combine_usage_instructions(raw_usage: list[str]) -> list[str]:
 
 
 def extract_metadata(other_list: list[str]) -> dict:
-    metadata = {"Re-examination": [], "Docter": [], "Notion": []}
+    metadata = {"Re-examination": [], "Doctor": [], "Notion": []}
     cleaned = [item.strip().strip("'").strip() for item in other_list]
 
-    for i, entry in enumerate(cleaned):
+    for entry in cleaned:
         if entry.startswith("Ngày hẹn tái khám"):
-            metadata["Re-examination"].append(entry.strip())
-
-        elif entry == "Y, Bác sĩ điều trị" and i + 1 < len(cleaned):
-            metadata["Docter"].append(f"{entry} - {cleaned[i + 1]}")
-
+            metadata["Re-examination"].append(entry)
+        elif entry.startswith("BS."):
+            metadata["Doctor"].append(entry)
         elif entry.startswith("Tái khám xin mang theo đơn"):
             metadata["Notion"].append(entry)
 
