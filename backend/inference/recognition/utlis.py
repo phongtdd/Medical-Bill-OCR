@@ -22,7 +22,6 @@ idx_to_char[0] = ''
 #Define transform of images
 #-------------------------------------------------------------------------------------------
 transform = A.Compose([
-    A.Resize(32, 2048),  # height fixed to 32, width 128 (adjust as needed)
     A.Normalize(mean=(0.5,), std=(0.5,)),
     ToTensorV2(),
 ])
@@ -88,7 +87,8 @@ def clean_decoded_text(text, blank_char=''):
 #Process images
 #-------------------------------------------------------------------------------------------
 def process_image(image_path):
-    image = Image.open(image_path).convert('L')  # grayscale
+    image = Image.open(image_path).convert('L')
+    image = custom_resize(image, min_width=256, target_height=32)
     transform_image = transform(image=np.array(image))
-    image = transform_image['image']
-    return image
+    tensor_image = transform_image['image']  
+    return tensor_image
