@@ -84,6 +84,18 @@ def clean_decoded_text(text, blank_char=''):
     return ''.join(cleaned)
 
 
+#Custom resize function
+def custom_resize(image, min_width=100, target_height=32):
+    """Resize PIL image: fix height, scale width proportionally, but width >= min_width."""
+    w, h = image.size
+    scale = target_height / h
+    new_w = int(w * scale)
+    if new_w < min_width:
+        new_w = min_width
+    image = image.resize((new_w, target_height), Image.BILINEAR)
+    return image
+
+
 #Process images
 #-------------------------------------------------------------------------------------------
 def process_image(image_path):
