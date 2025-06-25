@@ -38,3 +38,8 @@ docker run --gpus all -p 8501:8501 sagp1012/medical-bill-ocr:latest
 
 # Download models
 The trained models are available on the Hugging Face model hub: [Hugging Face model hub](https://huggingface.co/Sag1012/Medical_Bill_OCR)
+
+# Download dataset
+The training dataset is available on Google Drive: [Download Dataset](https://drive.google.com/drive/folders/1otCHzFmqecaXdpENwHbWtyTZ14u1xvin)
+
+You can download the dataset if you wish to retrain the model yourself.
